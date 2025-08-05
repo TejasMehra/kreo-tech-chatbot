@@ -1,10 +1,10 @@
 import streamlit as st
 import google.generativeai as genai
 
-# Page configuration
+# Page setup
 st.set_page_config(page_title="Kreo Tech AI Assistant", page_icon="🎮", layout="wide")
 
-# Custom CSS styling
+# Custom CSS
 st.markdown("""
     <style>
     .stApp {
@@ -37,50 +37,62 @@ st.markdown("""
 st.markdown("# 🎮 Kreo Tech – Pro Gamer Assistant")
 st.markdown("### Get expert guidance on gaming gear, performance setups, and support")
 
-# Load Gemini API key securely
-api_key = st.secrets["gemini"]["api_key"]
-genai.configure(api_key=api_key)
+# Secure API key from secrets
+if "gemini" in st.secrets and "api_key" in st.secrets["gemini"]:
+    api_key = st.secrets["gemini"]["api_key"]
+    genai.configure(api_key=api_key)
+else:
+    st.error("❌ Gemini API key not found in secrets.")
+    st.stop()
 
-# Initialize Gemini model with system instructions
+# Initialize model
 model = genai.GenerativeModel(
     model_name="models/gemini-1.5-flash",
     system_instruction="""
-    You are the Kreo Tech AI Assistant, an expert on high-end gaming gear designed for professional gamers and streamers.
+    You are the Kreo Tech AI Assistant, an expert in professional gaming peripherals.
     
-    Help users with:
-    
-    • 🎮 Product Info: You know the full Kreo catalog, including:
-      - Kreo Phantom Mouse – ₹6,499: Ultra-light, 20K DPI, RGB, wireless
-      - Kreo Mecha Keyboard – ₹10,499: Hot-swappable switches, PBT keycaps, per-key RGB
-      - Kreo Viper Monitor – ₹27,999: 27", 240Hz, 1ms IPS, G-Sync compatible
-      - Kreo Spectra Headset – ₹7,999: Spatial audio, noise-canceling mic, breathable cushions
-      - Kreo Apex Chair – ₹15,999: Lumbar foam, 4D armrests, ergonomic design
+    You help with:
+    🎮 Product Info:
+    - Kreo Phantom Mouse – ₹6,499: Ultra-light, 20K DPI, RGB, wireless
+    - Kreo Mecha Keyboard – ₹10,499: Hot-swappable switches, PBT keycaps, per-key RGB
+    - Kreo Viper Monitor – ₹27,999: 27", 240Hz, 1ms IPS, G-Sync compatible
+    - Kreo Spectra Headset – ₹7,999: Spatial audio, noise-canceling mic, breathable cushions
+    - Kreo Apex Chair – ₹15,999: Lumbar foam, 4D armrests, ergonomic design
 
-    • ⚙️ Setup Optimization: Tips on FPS boosts, low latency, monitor tuning, cable mgmt, lighting, and ergonomics
+    ⚙️ Setup Optimization:
+    FPS improvement, low latency tips, monitor tuning, cable management, lighting, ergonomics
 
-    • 📦 Customer Support: Returns (30-day), 1-year warranty, order help, shipping (3–5 biz days), contact at support@kreotech.in
+    📦 Support:
+    30-day returns, 1-year warranty, orders, shipping (3–5 days), support@kreotech.in
 
-    • 🕹️ Compatibility & Recommendations: Suggest gear based on game type (FPS, MOBA, sim), hand size, desk space, and budget.
+    🕹️ Compatibility:
+    Recommend gear based on games (FPS, MOBA, sim), hand size, desk space, and budget.
 
-    Be friendly, professional, and tailor responses to serious gamers who care about elite performance and style.
+    Be helpful, professional, and tailored to gamers who value performance and aesthetics.
     """
 )
 
-# Chat state
+# Session state chat setup
 if "chat" not in st.session_state:
     st.session_state.chat = model.start_chat()
 
-# Display past chat messages
+# Replay previous messages with proper avatars
 for msg in st.session_state.chat.history:
-    with st.chat_message(msg.role):
+    role = msg.role
+    avatar = "🧑‍💻" if role == "user" else "🎮"
+    with st.chat_message(role, avatar=avatar):
         st.markdown(msg.parts[0].text)
 
 # Chat input
 user_input = st.chat_input("Ask about gear, setups, or support")
 
 if user_input:
-    with st.chat_message("user"):
+    with st.chat_message("user", avatar="🧑‍💻"):
         st.markdown(user_input)
-    response = st.session_state.chat.send_message(user_input)
-    with st.chat_message("ai", avatar="🤖"):
-        st.markdown(response.text)
+    
+    try:
+        response = st.session_state.chat.send_message(user_input)
+        with st.chat_message("ai", avatar="🎮"):
+            st.markdown(response.text)
+    except Exception as e:
+        st.error("⚠️ Assistant is currently unavailable. You may have hit API limits or encountered a server issue.")
