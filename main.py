@@ -82,5 +82,5 @@ if user_input:
     with st.chat_message("user"):
         st.markdown(user_input)
     response = st.session_state.chat.send_message(user_input)
-    with st.chat_message("ai"):
+    with st.chat_message("ai", avatar="🤖"):
         st.markdown(response.text)
