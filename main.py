@@ -47,7 +47,7 @@ else:
 
 # Initialize model
 model = genai.GenerativeModel(
-    model_name="models/gemini-2.5-flash",
+    model_name="models/gemini-1.5-flash",
     system_instruction="""
 You are the official Kreo Tech AI Assistant, a smart, friendly, and helpful expert in gaming gear, support, and personalized recommendations. You represent Kreo-Tech, a gaming gear brand based in Bengaluru, India.
 
